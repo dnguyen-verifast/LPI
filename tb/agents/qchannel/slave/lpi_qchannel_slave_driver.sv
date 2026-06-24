@@ -23,6 +23,7 @@ class lpi_qchannel_slave_driver extends uvm_driver #(lpi_qchannel_item);
   endfunction
 
   task run_phase(uvm_phase phase);
+    
     cfg.vif.qreqn = 1'b1;                    // released with QREQn HIGH
     @(posedge cfg.vif.resetn);
     @(cfg.vif.ctrl_cb);
