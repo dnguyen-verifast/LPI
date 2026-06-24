@@ -10,6 +10,11 @@ class lpi_qchannel_coverage extends uvm_subscriber #(lpi_qchannel_item);
     option.per_instance = 1;
     cp_prev : coverpoint tr.prev_state { bins s[] = {Q_RUN,Q_REQUEST,Q_STOPPED,Q_EXIT,Q_DENIED,Q_CONTINUE}; }
     cp_curr : coverpoint tr.curr_state { bins s[] = {Q_RUN,Q_REQUEST,Q_STOPPED,Q_EXIT,Q_DENIED,Q_CONTINUE}; }
+    // Dedicated coverpoint for the illegal combination (QACCEPTn=0, QDENY=1,
+    // Table 2-1 'Unused'). In correct operation this bin must stay at 0 hits.
+    cp_illegal : coverpoint tr.curr_state { bins illegal = {Q_ILLEGAL}; }
+    // Legal Q-Channel edges (Figure 2-6). Only these cross bins are named;
+    // any other combination falls into the auto-generated default cross bins.
     x_edge  : cross cp_prev, cp_curr {
       bins run_req  = binsof(cp_prev) intersect {Q_RUN}      && binsof(cp_curr) intersect {Q_REQUEST};
       bins req_stop = binsof(cp_prev) intersect {Q_REQUEST}  && binsof(cp_curr) intersect {Q_STOPPED};
@@ -18,10 +23,7 @@ class lpi_qchannel_coverage extends uvm_subscriber #(lpi_qchannel_item);
       bins ex_run   = binsof(cp_prev) intersect {Q_EXIT}     && binsof(cp_curr) intersect {Q_RUN};
       bins den_cont = binsof(cp_prev) intersect {Q_DENIED}   && binsof(cp_curr) intersect {Q_CONTINUE};
       bins cont_run = binsof(cp_prev) intersect {Q_CONTINUE} && binsof(cp_curr) intersect {Q_RUN};
-      ignore_bins others = !(binsof(x_edge.run_req)  || binsof(x_edge.req_stop) ||
-                             binsof(x_edge.req_den)  || binsof(x_edge.stop_ex)  ||
-                             binsof(x_edge.ex_run)   || binsof(x_edge.den_cont) ||
-                             binsof(x_edge.cont_run));
+      
     }
   endgroup
 
